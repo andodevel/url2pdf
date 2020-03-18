@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  url2pdf:
+    container_name: url2pdf
+    build: .
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    networks: 
+      - url2pdf
+
+networks: 
+  url2pdf:
+    driver: bridge
