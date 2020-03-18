@@ -1,4 +1,9 @@
-node_modules
+.dockerignore
+.gcloudignore
+.git
+.gitignore
+.circleci/
+node_modules/
 npm-debug.log
 LICENSE.md
 README.md

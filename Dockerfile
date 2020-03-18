@@ -1,4 +1,4 @@
-FROM node:12.8.0-slim AS base
+FROM node:10.15.0-slim AS base
 
 RUN  apt-get update \
      && apt-get install -y wget --no-install-recommends \
@@ -14,11 +14,11 @@ WORKDIR /usr/src/app
 
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock /usr/src/app/
 RUN yarn install
 
-COPY . .
+COPY * /usr/src/app/
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD [ "node", "app.js" ]

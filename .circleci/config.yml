@@ -2,7 +2,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: node:12.8.0-slim
+      - image: node:10.15.0-slim
     working_directory: /usr/src/app
     steps:
       - checkout

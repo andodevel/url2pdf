@@ -5,9 +5,9 @@ services:
     container_name: url2pdf
     build: .
     ports:
-      - "3000:3000"
+      - "8080:8080"
     expose:
-      - "3000"
+      - "8080"
     networks: 
       - url2pdf
 
