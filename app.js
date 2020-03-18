@@ -108,4 +108,4 @@ app.use(async function (ctx) {
   }
 });
 
-if (!module.parent) app.listen(3000);
+if (!module.parent) app.listen(8080);

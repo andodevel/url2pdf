@@ -1,3 +1,5 @@
+docker-compose.yml
+Dockerfile
 .dockerignore
 .gcloudignore
 .git
