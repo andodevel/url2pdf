@@ -31,8 +31,8 @@ const url2pdf = async (url) => {
   // TODO: performance booting by invoking existing chrome process.
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: isDarwin ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : 'chromnium',
+    args: ['--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    executablePath: isDarwin ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : process.env.CHROME_BIN,
   });
 
   const page = await browser.newPage();
