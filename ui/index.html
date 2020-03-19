@@ -40,12 +40,14 @@
       position: absolute;
       top: 0;
       width: 100%;
-      background-color: rgba(66, 47, 83, 0.4);
+      background-color: rgba(6, 43, 68, 0.55);
       z-index: -1;
       border-radius: 10px;
     }
 
-    a {background-color:transparent !important;}
+    a {
+      background-color: transparent !important;
+    }
   </style>
 
 </head>
@@ -58,14 +60,14 @@
         <div class="row text-white">
           <div class="col-12 mx-auto text-center form p-4">
             <div class="px-2">
-              <form id="form" class="justify-content-center">
+              <form id="form" class="justify-content-center needs-validation" novalidate>
                 <div class="form-group">
                   <label class="sr-only">Link</label>
-                  <input type="text" id="url" name="url" class="form-control" placeholder="Link" autocomplete="off">
+                  <input type="text" id="url" name="url" class="form-control" placeholder="Link" autocomplete="off" required>
                 </div>
                 <div class="form-group">
                   <label class="sr-only">Email</label>
-                  <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional email">
+                  <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional Email" data-bv-excluded="false">
                 </div>
                 <button type="submit" id="submit" class="btn btn-warning btn-lg">
                   <span id="spinner" class="spinner-border spinner-border-sm mr-2" role="status" hidden></span>
@@ -73,12 +75,22 @@
                 </button>
               </form>
             </div>
+            <div id="alert" class="mt-2 alert alert-danger alert-dismissible fade show" role="alert" hidden>
+              <strong>Error!</strong><span id="error"> Unexpected error.</span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
             <div class="pt-5 px-2">
               <span>❤️</span><span class="mx-2">Folllow me at</span>
-              <a class="mx-1" target="_blank" role="button" href="https://github.com/andodevel/url2pdf"><i class="fa fa-github"></i></a>
-              <a class="mx-1" target="_blank" role="button" href="https://www.facebook.com/andodevel"><i class="fa fa-facebook"></i></a>
-              <a class="mx-1" role="button" href="mailto:ando.devel@gmail.com" target="_top"><i class="fa fa-envelope"></i></a>
-              <a class="mx-1" target="_blank" role="button" href="https://medium.com/@ando_79851"><i class="fa fa-medium"></i></a>
+              <a class="mx-1" target="_blank" role="button" href="https://github.com/andodevel/url2pdf"><i
+                  class="fa fa-github"></i></a>
+              <a class="mx-1" target="_blank" role="button" href="https://www.facebook.com/andodevel"><i
+                  class="fa fa-facebook"></i></a>
+              <a class="mx-1" role="button" href="mailto:ando.devel@gmail.com" target="_top"><i
+                  class="fa fa-envelope"></i></a>
+              <a class="mx-1" target="_blank" role="button" href="https://medium.com/@ando_79851"><i
+                  class="fa fa-medium"></i></a>
             </div>
           </div>
         </div>
@@ -89,21 +101,19 @@
   <script>
     function showLoadingState(isLoading) {
       actionEls.forEach(actionEl => {
-          actionEl.disabled = isLoading;
-        }
-      );
+        actionEl.disabled = isLoading;
+      });
       visibleEls.forEach(visibleEl => {
         visibleEl.hidden = !isLoading;
-        }
-      );
+      });
 
       if (!isLoading) {
-        submitEle.text = 'Converting...';
-      } else {
         submitEle.text = 'Convert';
         inputEles.forEach(inputEle => {
           inputEle.value = "";
         })
+      } else {
+        submitEle.text = 'Converting...';
       }
     };
 
@@ -151,28 +161,53 @@
           a.remove();
         })
         .then(() => showLoadingState(false))
-        .catch(() => showLoadingState(false));
+        .catch(() => {
+          showLoadingState(false);
+        });
     };
+
+    (function () {
+      'use strict';
+      window.addEventListener('load', function () {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function (form) {
+          form.addEventListener('submit', function (event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
 
     var formEl = document.getElementById('form');
     formEl.addEventListener('submit', function (event) {
       var queryData = {};
-      for (var i = 0; i < formEl.length; ++i) {
-        var input = formEl[i];
-        if (input.name && input.value) {
-          queryData[input.name] = input.value;
-        }
+      if (!urlEle.value) {
+        return;
+      }
+    
+      queryData[urlEle.name] = urlEle.value;
+      if (emailEle.value) {
+        queryData[emailEle.name] = emailEle.value;
       }
 
       submitForm(queryData);
       event.preventDefault();
+      event.stopPropagation();
     });
 
-    
+
     var urlEle = document.getElementById('url');
     var emailEle = document.getElementById('email');
     var spinnerEle = document.getElementById('spinner');
     var submitEle = document.getElementById('submit');
+    var alertEle = document.getElementById('alert');
+    var errorEle = document.getElementById('error');
 
     var inputEles = [];
     inputEles.push(urlEle);

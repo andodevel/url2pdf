@@ -5,7 +5,9 @@
 // Minified ui code
 // Rate limiter
 // Return error
-// Validate inputs
+// ignore email validate
+// Reset validator after finish
+// Move submit to loaded
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
