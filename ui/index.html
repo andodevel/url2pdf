@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>URL2PDF</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap-4.0.0-dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+  <style>
+    .qr-container {
+      margin-top: 3rem;
+    }
+
+    .qr {
+      margin-bottom: 2rem;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light static-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Home ❤️</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+        aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Github</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5">URL2PDF</h1>
+        <h6><small>0.0.1</small></h6>
+        <div class="qr-container h-100">
+          <div class="h-200 justify-content-center align-items-center">
+            <div class="form-container">
+              <!-- TODO: validate form -->
+              <form class="text-center p-5" action="api/v1/pdf">
+                <input type="text" id="url" name="url" class="form-control mb-4" placeholder="Link" autocomplete="off">
+                <input type="text" id="email" name="email" class="form-control mb-4" placeholder="Optional email">
+                <button class="btn btn-info btn-block my-4" type="submit">Convert</button>
+                <p>Folow me at:</p>
+                <a href="#" class="mx-2" role="button"><i class="fab fa-facebook-f light-blue-text"></i></a>
+                <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
+              </form>
+            </div>
+            <div class="col">
+              <div><span class="text-danger">Hello Darkness, my old friend!</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery-3.4.1-dist/jquery.min.js"></script>
+  <script src="vendor/bootstrap-4.0.0-dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

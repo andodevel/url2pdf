@@ -1,11 +1,17 @@
 'use strict';
 
+// TODO:
+// 404 handler
+// Minified ui code
+
 const puppeteer = require('puppeteer-core');
-const koa = require('koa');
+const Koa = require('koa');
+var Router = require('koa-router');
 const cors = require('@koa/cors');
 const favicon = require('koa-favicon');
 const compress = require('koa-compress');
 const sanitize = require('sanitize-filename');
+const serve = require('koa-static');
 
 const isDarwin = 'darwin' === process.platform
 
@@ -91,17 +97,19 @@ const isValidURL = (url) => {
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
     '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    '(\\?.*)?');
+
   return url && !!pattern.test(url);
 }
 
 // ************** Server
-const app = module.exports = new koa();
+const app = module.exports = new Koa();
+const router = new Router();
 
 // Middlewares
 app.use(cors());
-app.use(favicon(__dirname + '/favicon.ico'));
+// TODO: Update favicon
+app.use(favicon(__dirname + '/ui/favicon.ico'));
 app.use(compress({
   filter: function (content_type) {
   	return /text/i.test(content_type)
@@ -109,9 +117,12 @@ app.use(compress({
   threshold: 2048,
   flush: require('zlib').Z_SYNC_FLUSH
 }))
+app.use(serve(__dirname + '/ui', {
+  gzip: true
+}));
 
 // API
-app.use(async function (ctx) {
+router.get('/api/v1/pdf', async function (ctx) {
   const url = ctx.query.url;
   if (!isValidURL(url)) {
     console.log(`Bad url ${url}`);
@@ -141,6 +152,8 @@ app.use(async function (ctx) {
     ctx.throw(500, 'Failed to create pdf');
   }
 });
+
+app.use(router.routes()).use(router.allowedMethods());
 
 // UI
 
