@@ -10,3 +10,4 @@ npm-debug.log
 LICENSE.md
 README.md
 .nvm
+*.log

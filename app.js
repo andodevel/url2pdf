@@ -4,6 +4,8 @@ const puppeteer = require('puppeteer-core');
 const koa = require('koa');
 const cors = require('@koa/cors');
 const favicon = require('koa-favicon');
+const compress = require('koa-compress');
+const sanitize = require('sanitize-filename');
 
 const isDarwin = 'darwin' === process.platform
 
@@ -26,6 +28,7 @@ const scrollToEnd = async (page) => {
   });
 };
 
+// TODO: Fallback to wkhtml2pdf if chrome fail to launch
 const url2pdf = async (url) => {
   // Set up browser and page.
   // TODO: performance booting by invoking existing chrome process.
@@ -63,10 +66,27 @@ const url2pdf = async (url) => {
   // Close the browser.
   await browser.close();
 
-  return pdf;
+  const pdfFilename = buildFileName(url);
+  return { pdf, pdfFilename };
 };
 
-function isValidURL(url) {
+const buildFileName = (url) => {
+  if (url.endsWith('/')) {
+    url = url.substring(0, url.length - 1);
+  }
+
+  let filename = url.split('#').shift().split('?').shift().split('/').pop();
+  if (filename) {
+    filename = sanitize(filename);
+  }
+
+  filename = filename ? filename : 'exported';
+  const limit = filename.length > 100 ? 100 : filename.length;
+  filename = filename.substring(0, limit);
+  return filename + '_' + (new Date()).getTime() + '.pdf';
+}
+
+const isValidURL = (url) => {
   var pattern = new RegExp('^((http)?s?:\\/\\/)?' + // protocol
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
     '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
@@ -76,10 +96,21 @@ function isValidURL(url) {
   return url && !!pattern.test(url);
 }
 
-// Server
+// ************** Server
 const app = module.exports = new koa();
+
+// Middlewares
 app.use(cors());
 app.use(favicon(__dirname + '/favicon.ico'));
+app.use(compress({
+  filter: function (content_type) {
+  	return /text/i.test(content_type)
+  },
+  threshold: 2048,
+  flush: require('zlib').Z_SYNC_FLUSH
+}))
+
+// API
 app.use(async function (ctx) {
   const url = ctx.query.url;
   if (!isValidURL(url)) {
@@ -88,7 +119,7 @@ app.use(async function (ctx) {
   }
   console.info(`Request url ${url}`);
 
-  const pdf = await url2pdf(url);
+  const { pdf, pdfFilename } = await url2pdf(url);
   if (pdf) {
     const email = ctx.query.email;
     if (email && /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
@@ -100,7 +131,10 @@ app.use(async function (ctx) {
         message: `PDF has been sent to your email ${email}`
       };
     } else {
+      ctx.compress = true
       ctx.type = 'application/pdf';
+      ctx.set('Content-Disposition', 'attachment;filename=' + pdfFilename);
+      ctx.length = pdf.length;
       ctx.body = pdf;
     }
   } else {
@@ -108,4 +142,7 @@ app.use(async function (ctx) {
   }
 });
 
-if (!module.parent) app.listen(8080);
+// UI
+
+var port = process.env.PORT || 8080;
+if (!module.parent) app.listen(port);
