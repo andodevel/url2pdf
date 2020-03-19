@@ -4,7 +4,8 @@
 // 404 handler
 // Minified ui code
 // Rate limiter
-// Block UI
+// Return error
+// Validate inputs
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');

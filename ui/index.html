@@ -13,10 +13,11 @@
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <style>
     #cover {
-      background: #222 url('https://source.unsplash.com/1600x900/?nature') center center no-repeat;
+      background: #fff url('https://source.unsplash.com/1600x900/?nature') center center no-repeat;
       background-size: cover;
       height: 100%;
       text-align: center;
@@ -39,10 +40,12 @@
       position: absolute;
       top: 0;
       width: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(66, 47, 83, 0.4);
       z-index: -1;
       border-radius: 10px;
     }
+
+    a {background-color:transparent !important;}
   </style>
 
 </head>
@@ -64,14 +67,18 @@
                   <label class="sr-only">Email</label>
                   <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional email">
                 </div>
-                <button type="submit" class="btn btn-dark btn-lg">Convert</button>
+                <button type="submit" id="submit" class="btn btn-warning btn-lg">
+                  <span id="spinner" class="spinner-border spinner-border-sm mr-2" role="status" hidden></span>
+                  Convert
+                </button>
               </form>
             </div>
-            <div class="mt-5 px-2">
-              <span>❤️ Folow me at</span>
-              <a href="#" class="mx-2" role="button"><i class="fab fa-facebook-f light-blue-text"></i></a>
-              <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
-              <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
+            <div class="pt-5 px-2">
+              <span>❤️</span><span class="mx-2">Folllow me at</span>
+              <a class="mx-1" target="_blank" role="button" href="https://github.com/andodevel/url2pdf"><i class="fa fa-github"></i></a>
+              <a class="mx-1" target="_blank" role="button" href="https://www.facebook.com/andodevel"><i class="fa fa-facebook"></i></a>
+              <a class="mx-1" role="button" href="mailto:ando.devel@gmail.com" target="_top"><i class="fa fa-envelope"></i></a>
+              <a class="mx-1" target="_blank" role="button" href="https://medium.com/@ando_79851"><i class="fa fa-medium"></i></a>
             </div>
           </div>
         </div>
@@ -80,6 +87,26 @@
   </section>
 
   <script>
+    function showLoadingState(isLoading) {
+      actionEls.forEach(actionEl => {
+          actionEl.disabled = isLoading;
+        }
+      );
+      visibleEls.forEach(visibleEl => {
+        visibleEl.hidden = !isLoading;
+        }
+      );
+
+      if (!isLoading) {
+        submitEle.text = 'Converting...';
+      } else {
+        submitEle.text = 'Convert';
+        inputEles.forEach(inputEle => {
+          inputEle.value = "";
+        })
+      }
+    };
+
     function buildQuery(data) {
       if (typeof (data) === 'string') return data;
 
@@ -96,6 +123,7 @@
     function submitForm(queryData) {
       var headers = new Headers();
       var filename;
+      showLoadingState(true);
       fetch("api/v1/pdf?" + buildQuery(queryData), {
           headers,
           method: 'GET'
@@ -121,8 +149,9 @@
           document.body.appendChild(a);
           a.click();
           a.remove();
-          console.log("downloaded vanilla");
-        });
+        })
+        .then(() => showLoadingState(false))
+        .catch(() => showLoadingState(false));
     };
 
     var formEl = document.getElementById('form');
@@ -138,6 +167,24 @@
       submitForm(queryData);
       event.preventDefault();
     });
+
+    
+    var urlEle = document.getElementById('url');
+    var emailEle = document.getElementById('email');
+    var spinnerEle = document.getElementById('spinner');
+    var submitEle = document.getElementById('submit');
+
+    var inputEles = [];
+    inputEles.push(urlEle);
+    inputEles.push(emailEle);
+
+    var actionEls = [];
+    actionEls.push(urlEle);
+    actionEls.push(emailEle);
+    actionEls.push(submitEle);
+
+    var visibleEls = [];
+    visibleEls.push(spinnerEle);
   </script>
   <!-- Bootstrap core JavaScript -->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
