@@ -3,6 +3,8 @@
 // TODO:
 // 404 handler
 // Minified ui code
+// Rate limiter
+// Block UI
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');

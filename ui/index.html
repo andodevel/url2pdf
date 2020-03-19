@@ -11,56 +11,144 @@
   <title>url2pdf</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="vendor/bootstrap-4.0.0-dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
   <style>
-    .qr-container {
-      margin-top: 3rem;
+    #cover {
+      background: #222 url('https://source.unsplash.com/1600x900/?nature') center center no-repeat;
+      background-size: cover;
+      height: 100%;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      position: relative;
     }
 
-    .qr {
-      margin-bottom: 2rem;
+    #cover-caption {
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* only used for background overlay not needed for centering */
+    form:before {
+      content: '';
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+      border-radius: 10px;
     }
   </style>
 
 </head>
 
 <body>
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light static-top">
-    <div class="container">
-      <a class="navbar-brand" href="#">ur2pdf</a>
-    </div>
-  </nav>
-
   <!-- Page Content -->
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12 text-center">
-        <div class="qr-container h-100">
-          <div class="h-200 justify-content-center align-items-center">
-            <div class="form-container">
-              <!-- TODO: validate form -->
-              <form class="text-center p-5" method="GET" action="api/v1/pdf">
-                <input type="text" id="url" name="url" class="form-control mb-4" placeholder="Link" autocomplete="off">
-                <input type="text" id="email" name="email" class="form-control mb-4" placeholder="Optional email">
-                <button class="btn btn-info btn-block my-4" type="submit">Convert</button>
-                <p>❤️ Folow me at</p>
-                <a href="#" class="mx-2" role="button"><i class="fab fa-facebook-f light-blue-text"></i></a>
-                <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
-                <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
+  <section id="cover" class="min-vh-100">
+    <div id="cover-caption">
+      <div class="container">
+        <div class="row text-white">
+          <div class="col-12 mx-auto text-center form p-4">
+            <div class="px-2">
+              <form id="form" class="justify-content-center">
+                <div class="form-group">
+                  <label class="sr-only">Link</label>
+                  <input type="text" id="url" name="url" class="form-control" placeholder="Link" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label class="sr-only">Email</label>
+                  <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional email">
+                </div>
+                <button type="submit" class="btn btn-dark btn-lg">Convert</button>
               </form>
+            </div>
+            <div class="mt-5 px-2">
+              <span>❤️ Folow me at</span>
+              <a href="#" class="mx-2" role="button"><i class="fab fa-facebook-f light-blue-text"></i></a>
+              <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
+              <a href="#" class="mx-2" role="button"><i class="fab fa-github light-blue-text"></i></a>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
+  <script>
+    function buildQuery(data) {
+      if (typeof (data) === 'string') return data;
+
+      var query = [];
+      for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+          query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+        }
+      }
+
+      return query.join('&');
+    };
+
+    function submitForm(queryData) {
+      var headers = new Headers();
+      var filename;
+      fetch("api/v1/pdf?" + buildQuery(queryData), {
+          headers,
+          method: 'GET'
+        })
+        .then(response => {
+          if (response.status === 400) {
+            throw new Error('Invalid URL or Email');
+          }
+
+          if (response.status !== 200) {
+            throw new Error('Failed to convert to PDF');
+          }
+
+          filename = response.headers.get('content-disposition').split('filename=')[1];
+          var blob = response.blob();
+          return blob;
+        })
+        .then(blob => {
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          console.log("downloaded vanilla");
+        });
+    };
+
+    var formEl = document.getElementById('form');
+    formEl.addEventListener('submit', function (event) {
+      var queryData = {};
+      for (var i = 0; i < formEl.length; ++i) {
+        var input = formEl[i];
+        if (input.name && input.value) {
+          queryData[input.name] = input.value;
+        }
+      }
+
+      submitForm(queryData);
+      event.preventDefault();
+    });
+  </script>
   <!-- Bootstrap core JavaScript -->
-  <script src="vendor/jquery-3.4.1-dist/jquery.min.js"></script>
-  <script src="vendor/bootstrap-4.0.0-dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+  </script>
 
 </body>
 
