@@ -11,3 +11,5 @@ LICENSE.md
 README.md
 .nvm
 *.log
+.env
+.nvmrc

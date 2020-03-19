@@ -109,7 +109,7 @@ const router = new Router();
 // Middlewares
 app.use(cors());
 // TODO: Update favicon
-app.use(favicon(__dirname + '/ui/favicon.ico'));
+app.use(favicon(__dirname + '/favicon.png'));
 app.use(compress({
   filter: function (content_type) {
   	return /text/i.test(content_type)
@@ -117,7 +117,7 @@ app.use(compress({
   threshold: 2048,
   flush: require('zlib').Z_SYNC_FLUSH
 }))
-app.use(serve(__dirname + '/ui', {
+app.use(serve(__dirname + '/ui/', {
   gzip: true
 }));
 

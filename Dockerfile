@@ -17,7 +17,7 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package.json yarn.lock /usr/src/app/
 RUN yarn install
 
-COPY * /usr/src/app/
+COPY . /usr/src/app/
 
 EXPOSE 8080
 
