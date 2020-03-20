@@ -8,6 +8,10 @@
 // ignore email validate
 // Reset validator after finish
 // Move submit to loaded
+// Add caching
+// URL 404
+// API and docs
+// Reponsive issue on Nokia phone
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
@@ -17,6 +21,7 @@ const favicon = require('koa-favicon');
 const compress = require('koa-compress');
 const sanitize = require('sanitize-filename');
 const serve = require('koa-static');
+var nodemailer = require('nodemailer');
 
 const isDarwin = 'darwin' === process.platform
 
@@ -39,7 +44,7 @@ const scrollToEnd = async (page) => {
   });
 };
 
-// TODO: Fallback to wkhtml2pdf if chrome fail to launch
+// TODO: Fallback to wkhtml2pdf if chrome fail to launch or convert
 const url2pdf = async (url) => {
   // Set up browser and page.
   // TODO: performance booting by invoking existing chrome process.
@@ -92,7 +97,7 @@ const buildFileName = (url) => {
   }
 
   filename = filename ? filename : 'exported';
-  const limit = filename.length > 100 ? 100 : filename.length;
+  const limit = filename.length > 60 ? 60 : filename.length;
   filename = filename.substring(0, limit);
   return filename + '_' + (new Date()).getTime() + '.pdf';
 }
@@ -126,6 +131,20 @@ app.use(serve(__dirname + '/ui/', {
   gzip: true
 }));
 
+var senderEmailAddress = process.env.EMAIL_ADDRESS;
+var senderEmailPassword = process.env.EMAIL_PASSWORD;
+var sedingMailEnabled = senderEmailAddress && senderEmailPassword;
+if (!sedingMailEnabled) {
+  console.log('Sending email feature is disabled due to missing env EMAIL_ADDRESS and EMAIL_PASSWORD');
+}
+var mailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+         user: senderEmailAddress,
+         pass: senderEmailPassword
+     }
+ });
+
 // API
 router.get('/api/v1/pdf', async function (ctx) {
   const url = ctx.query.url;
@@ -138,15 +157,34 @@ router.get('/api/v1/pdf', async function (ctx) {
   const { pdf, pdfFilename } = await url2pdf(url);
   if (pdf) {
     const email = ctx.query.email;
-    if (email && /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+    if (sedingMailEnabled && email && /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
       // TODO: Send to email
       console.info(`Request email ${email}`);
       ctx.type = 'application/json; charset=utf-8';
-      ctx.body = {
-        status: 'success',
-        message: `PDF has been sent to your email ${email}`
+      const mailOptions = {
+        to: email,
+        subject: '[url2pdf] Your converted PDF',
+        html: '<p>-- Hello, world --</p>',
+        attachments:[{
+          filename: pdfFilename,
+          content: Buffer.from(pdf, 'base64'),
+          contentType: 'application/pdf'
+      }]
       };
+      mailTransporter.sendMail(mailOptions, function (err, info) {
+        if(!err) {
+          console.log(`Converted PDF has been sent to email ${email}`);
+          ctx.body = {
+            status: 'success',
+            message: `PDF has been sent to your email ${email}`
+          };
+        } else {
+          console.log(`Failed to send pdf to email ${email}. Error: ${err}`);
+          ctx.throw(500, `Failed to send pdf to email ${email}`);
+        }
+      });
     } else {
+      console.log(`Streaming converted PDF...`);
       ctx.compress = true
       ctx.type = 'application/pdf';
       ctx.set('Content-Disposition', 'attachment;filename=' + pdfFilename);

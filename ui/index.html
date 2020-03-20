@@ -17,7 +17,7 @@
 
   <style>
     #cover {
-      background: rgb(188, 138, 207) url('https://source.unsplash.com/collection/9728997/1600x900') center center no-repeat;
+      background: rgb(238, 215, 241) url('https://source.unsplash.com/collection/9728997/1600x900') center center no-repeat;
       background-size: cover;
       height: 100%;
       text-align: center;
@@ -63,16 +63,16 @@
             <div class="px-2">
               <form id="form" class="justify-content-center needs-validation" novalidate>
                 <div class="form-group">
-                  <label class="sr-only">Link</label>
-                  <input type="text" id="url" name="url" class="form-control" placeholder="Link" autocomplete="off" required>
+                  <label class="sr-only">URL</label>
+                  <input type="text" id="url" name="url" class="form-control" placeholder="https://" autocomplete="off" required>
                 </div>
                 <div class="form-group">
                   <label class="sr-only">Email</label>
                   <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional Email" data-bv-excluded="false">
                 </div>
                 <button type="submit" id="submit" class="btn btn-warning btn-lg">
-                  <span id="spinner" class="spinner-border spinner-border-sm mr-2" role="status" hidden></span>
-                  Convert
+                  <span id="spinner" class="spinner-border spinner-border-sm mr-1" role="status" hidden></span>
+                  <span id="submitText">Convert</span>
                 </button>
               </form>
             </div>
@@ -82,7 +82,7 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="pt-5 px-2">
+            <div class="mt-4 px-2">
               <span>❤️</span><span class="mx-2">Folllow me at</span>
               <a class="mx-1" target="_blank" role="button" href="https://github.com/andodevel/url2pdf"><i
                   class="fa fa-github"></i></a>
@@ -109,12 +109,12 @@
       });
 
       if (!isLoading) {
-        submitEle.text = 'Convert';
+        submitTextEle.textContent = 'Convert';
         inputEles.forEach(inputEle => {
           inputEle.value = "";
         })
       } else {
-        submitEle.text = 'Converting...';
+        submitTextEle.textContent = 'Converting...';
       }
     };
 
@@ -206,7 +206,7 @@
     var urlEle = document.getElementById('url');
     var emailEle = document.getElementById('email');
     var spinnerEle = document.getElementById('spinner');
-    var submitEle = document.getElementById('submit');
+    var submitTextEle = document.getElementById('submitText');
     var alertEle = document.getElementById('alert');
     var errorEle = document.getElementById('error');
 
@@ -217,7 +217,7 @@
     var actionEls = [];
     actionEls.push(urlEle);
     actionEls.push(emailEle);
-    actionEls.push(submitEle);
+    actionEls.push(submitTextEle);
 
     var visibleEls = [];
     visibleEls.push(spinnerEle);
