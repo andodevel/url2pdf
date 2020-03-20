@@ -12,6 +12,7 @@
 // URL 404
 // API and docs
 // Reponsive issue on Nokia phone
+// Watermark
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
@@ -107,7 +108,7 @@ const isValidURL = (url) => {
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
     '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-    '(\\?.*)?');
+    '(\\?.*)?'); // any
 
   return url && !!pattern.test(url);
 }
@@ -122,7 +123,7 @@ app.use(cors());
 app.use(favicon(__dirname + '/favicon.png'));
 app.use(compress({
   filter: function (content_type) {
-  	return /text/i.test(content_type)
+    return /text/i.test(content_type)
   },
   threshold: 2048,
   flush: require('zlib').Z_SYNC_FLUSH
@@ -140,10 +141,10 @@ if (!sedingMailEnabled) {
 var mailTransporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-         user: senderEmailAddress,
-         pass: senderEmailPassword
-     }
- });
+    user: senderEmailAddress,
+    pass: senderEmailPassword
+  }
+});
 
 // API
 router.get('/api/v1/pdf', async function (ctx) {
@@ -165,24 +166,33 @@ router.get('/api/v1/pdf', async function (ctx) {
         to: email,
         subject: '[url2pdf] Your converted PDF',
         html: '<p>-- Hello, world --</p>',
-        attachments:[{
+        attachments: [{
           filename: pdfFilename,
           content: Buffer.from(pdf, 'base64'),
           contentType: 'application/pdf'
-      }]
+        }]
       };
-      mailTransporter.sendMail(mailOptions, function (err, info) {
-        if(!err) {
-          console.log(`Converted PDF has been sent to email ${email}`);
-          ctx.body = {
-            status: 'success',
-            message: `PDF has been sent to your email ${email}`
-          };
-        } else {
-          console.log(`Failed to send pdf to email ${email}. Error: ${err}`);
-          ctx.throw(500, `Failed to send pdf to email ${email}`);
-        }
-      });
+      try {
+        await new Promise(function (resolve, reject) {
+          mailTransporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+        console.log(`Converted PDF has been sent to email ${email}`);
+        ctx.body = {
+          status: 'success',
+          message: `PDF has been sent to your email ${email}`
+        };
+      } catch (e) {
+        console.log(`Failed to send pdf to email ${email}. Error: ${err}`);
+        ctx.throw(500, `Failed to send pdf to email ${email}`);
+      }
+
+      console.log('sync code');
     } else {
       console.log(`Streaming converted PDF...`);
       ctx.compress = true

@@ -64,11 +64,13 @@
               <form id="form" class="justify-content-center needs-validation" novalidate>
                 <div class="form-group">
                   <label class="sr-only">URL</label>
-                  <input type="text" id="url" name="url" class="form-control" placeholder="https://" autocomplete="off" required>
+                  <input type="text" id="url" name="url" class="form-control" placeholder="https://" autocomplete="off"
+                    required>
                 </div>
                 <div class="form-group">
                   <label class="sr-only">Email</label>
-                  <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional Email" data-bv-excluded="false">
+                  <input type="email" id="email" name="email" class="form-control mb-4" placeholder="Optional Email"
+                    data-bv-excluded="false">
                 </div>
                 <button type="submit" id="submit" class="btn btn-warning btn-lg">
                   <span id="spinner" class="spinner-border spinner-border-sm mr-1" role="status" hidden></span>
@@ -76,14 +78,20 @@
                 </button>
               </form>
             </div>
-            <div id="alert" class="mt-2 alert alert-danger alert-dismissible fade show" role="alert" hidden>
-              <strong>Error!</strong><span id="error"> Unexpected error.</span>
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <div id="alertError" class="mt-4 alert alert-danger fade show" role="alert" style="display: none;">
+              <strong>Error! </strong><span id="alertErrorTxt">Try again later!</span>
+              <button id="alertErrorBtn" type="button" class="close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div id="alertSuccess" class="mt-4 alert alert-success fade show" role="alert" style="display: none;">
+              <strong>Success! </strong><span id="alertSuccessTxt">Converting has been done.</span>
+              <button id="alertSuccessBtn" type="button" class="close" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="mt-4 px-2">
-              <span>❤️</span><span class="mx-2">Folllow me at</span>
+              <span>❤️</span><span class="mx-2">Follow me at</span>
               <a class="mx-1" target="_blank" role="button" href="https://github.com/andodevel/url2pdf"><i
                   class="fa fa-github"></i></a>
               <a class="mx-1" target="_blank" role="button" href="https://www.facebook.com/andodevel"><i
@@ -114,7 +122,7 @@
           inputEle.value = "";
         })
       } else {
-        submitTextEle.textContent = 'Converting...';
+        submitTextEle.textContent = 'Converting';
       }
     };
 
@@ -135,35 +143,50 @@
       var headers = new Headers();
       var filename;
       showLoadingState(true);
+      $("#alertError").hide();
+      $("#alertSuccess").hide();
+
       fetch("api/v1/pdf?" + buildQuery(queryData), {
           headers,
           method: 'GET'
         })
         .then(response => {
-          if (response.status === 400) {
-            throw new Error('Invalid URL or Email');
-          }
-
           if (response.status !== 200) {
-            throw new Error('Failed to convert to PDF');
+            throw new Error('' + response.status);
           }
 
-          filename = response.headers.get('content-disposition').split('filename=')[1];
           var blob = response.blob();
+          var disposition = response.headers.get('content-disposition');
+          if (disposition) {
+            filename = disposition.split('filename=')[1];
+          }
           return blob;
         })
         .then(blob => {
-          var url = window.URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
+          var isSentViaEmail = true;
+          if (filename) {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            isSentViaEmail = false;
+          }
+
+          return isSentViaEmail;
         })
-        .then(() => showLoadingState(false))
-        .catch(() => {
+        .then((isSentViaEmail) => {
           showLoadingState(false);
+          $("#alertSuccessTxt").text(isSentViaEmail ? 'PDF has been sent to your email.' : 'PDF has been downloaded.');
+          $("#alertSuccess").show();
+        })
+        .catch((e) => {
+          const msg = e.message;
+          showLoadingState(false);
+          $("#alertErrorTxt").text(msg === '400' ? 'Invalid url or email!' : 'Something wrong with the server. Try again later!');
+          $("#alertError").show();
         });
     };
 
@@ -182,6 +205,14 @@
             form.classList.add('was-validated');
           }, false);
         });
+
+        // Alerts
+        $('#alertErrorBtn').on('click', function () {
+          $("#alertError").hide();
+        });
+        $('#alertSuccessBtn').on('click', function () {
+          $("#alertSuccess").hide();
+        });
       }, false);
     })();
 
@@ -191,7 +222,7 @@
       if (!urlEle.value) {
         return;
       }
-    
+
       queryData[urlEle.name] = urlEle.value;
       if (emailEle.value) {
         queryData[emailEle.name] = emailEle.value;
@@ -207,8 +238,6 @@
     var emailEle = document.getElementById('email');
     var spinnerEle = document.getElementById('spinner');
     var submitTextEle = document.getElementById('submitText');
-    var alertEle = document.getElementById('alert');
-    var errorEle = document.getElementById('error');
 
     var inputEles = [];
     inputEles.push(urlEle);
