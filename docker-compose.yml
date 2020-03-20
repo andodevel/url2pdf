@@ -5,11 +5,17 @@ services:
     container_name: url2pdf
     build: .
     ports:
+      - "${PORT}:${PORT}"
       - "8080:8080"
     expose:
+      - "${PORT}"
       - "8080"
     networks: 
       - url2pdf
+    environment:
+      - PORT=${PORT}
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
 
 networks: 
   url2pdf:

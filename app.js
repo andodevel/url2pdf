@@ -202,3 +202,4 @@ app.use(router.routes()).use(router.allowedMethods());
 
 var port = process.env.PORT || 8080;
 if (!module.parent) app.listen(port);
+console.log(`Start an instance of url2pdf server at :${port}`);
