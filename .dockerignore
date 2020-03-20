@@ -6,10 +6,9 @@ Dockerfile
 .gitignore
 .circleci/
 node_modules/
-npm-debug.log
-LICENSE.md
-README.md
+*.md
 .nvm
 *.log
 .env
 .nvmrc
+k8s/

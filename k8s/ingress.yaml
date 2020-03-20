@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: url2pdf-ingress
+  namespace: default
+  annotations:
+      kubernetes.io/ingress.global-static-ip-name: <<staic-ip-name>>
+      networking.gke.io/managed-certificates: url2pdf-cert
+spec:
+  backend:
+    serviceName: url2pdf-service
+    servicePort: 80
+status:
+  loadBalancer: {}
