@@ -1,7 +1,7 @@
 # url2pdf
 
-URL to PDF converter that uses [Chrome](https://www.google.com/chrome/) headless 'print as PDF' and
-[wkhtml](https://wkhtmltopdf.org/) under the hood. Also support for sending pdf to specific email :).   
+URL to PDF converter that uses [Chrome](https://www.google.com/chrome/) headless 'print as PDF' under the hood.
+ Also support for sending pdf to specific email :).  
 Please give [url2pdf.dev](https://url2pdf.dev) a try if you want to see how this project is in prodution. Feel free if you
 want to deploy this to your own server.  
 
@@ -37,7 +37,7 @@ yarn start
 docker-compose build
 ```
 To (re)build the docker image  
-Later on, you can just 
+Later on, you can just  
 ```
 docker-compose start
 ```

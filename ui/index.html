@@ -228,6 +228,7 @@
     })();
 
     var formEl = document.getElementById('form');
+    // FIXME: Validator prevents this submit.
     formEl.addEventListener('submit', function (event) {
       var queryData = {};
       if (!urlEle.value) {

@@ -67,40 +67,41 @@ const url2pdf = async (url) => {
     });
   }
 
+  let pdf;
   const page = await browser.newPage();
   try {
-  page.setViewport({ width: 1280, height: 926 });
-  await page.setDefaultNavigationTimeout(pageTimeout);
+    page.setViewport({ width: 1280, height: 926 });
+    await page.setDefaultNavigationTimeout(pageTimeout);
 
-  // Navigate to the demo page.
-  await page.goto(url);
+    // Navigate to the demo page.
+    await page.goto(url);
 
-  // Some page need scrolling to lazy load image.
-  await scrollToEnd(page);
-  try {
-    await Promise.all([page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 2000 })]);
-  } catch (e) {
-    console.log('Ignore timeout(2 seconds) issue!');
-  }
-
-  const pdf = await page.pdf({
-    format: 'A4', margin: {
-      left: '30px',
-      top: '30px',
-      right: '20px',
-      bottom: '30px'
+    // Some page need scrolling to lazy load image.
+    await scrollToEnd(page);
+    try {
+      await Promise.all([page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 2000 })]);
+    } catch (e) {
+      console.log('Ignore timeout(2 seconds) issue!');
     }
-  });
-  if (pdf) {
-    console.log('Wrote pdf to buffer');
-  }
+
+    pdf = await page.pdf({
+      format: 'A4', margin: {
+        left: '30px',
+        top: '30px',
+        right: '20px',
+        bottom: '30px'
+      }
+    });
+    if (pdf) {
+      console.log('Wrote pdf to buffer');
+    }
   } finally {
-    if (page){
-    // Close the page.
-    await page.close();
+    if (page) {
+      // Close the page.
+      await page.close();
     }
   }
-  
+
   const pdfFilename = buildFileName(url);
   return { pdf, pdfFilename };
 };
@@ -177,7 +178,7 @@ app.use(ratelimit({
     reset: 'Rate-Limit-Reset',
     total: 'Rate-Limit-Total'
   },
-  max: 20,
+  max: 5,
   disableHeader: false,
   whitelist: (ctx) => {
     // return true;
