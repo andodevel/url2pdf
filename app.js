@@ -11,20 +11,23 @@
 // Add caching
 // URL 404
 // API and docs
-// Reponsive issue on Nokia phone
 // Watermark
+// Auto expand http(s)
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
-var Router = require('koa-router');
+const Router = require('koa-router');
 const cors = require('@koa/cors');
 const favicon = require('koa-favicon');
 const compress = require('koa-compress');
 const sanitize = require('sanitize-filename');
 const serve = require('koa-static');
-var nodemailer = require('nodemailer');
+const ratelimit = require('koa-ratelimit');
+const nodemailer = require('nodemailer');
 
 const isDarwin = 'darwin' === process.platform
+const chromePort = 21222;
+const pageTimeout = 0; // 30s
 
 const scrollToEnd = async (page) => {
   await page.evaluate(async () => {
@@ -48,15 +51,24 @@ const scrollToEnd = async (page) => {
 // TODO: Fallback to wkhtml2pdf if chrome fail to launch or convert
 const url2pdf = async (url) => {
   // Set up browser and page.
-  // TODO: performance booting by invoking existing chrome process.
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    executablePath: isDarwin ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : process.env.CHROME_BIN,
-  });
+  const browserURL = `http://127.0.0.1:${chromePort}`;
+  let browser;
+  try {
+    browser = await puppeteer.connect({browserURL});
+    console.log('Connecting to existing instance of Chrome.');
+  } catch {}
+  if (!browser) {
+    console.log('Launch new instance of Chrome.');
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--remote-debugging-port=21222'],
+      executablePath: isDarwin ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : process.env.CHROME_BIN,
+    });
+  }
 
   const page = await browser.newPage();
   page.setViewport({ width: 1280, height: 926 });
+  await page.setDefaultNavigationTimeout(pageTimeout);
 
   // Navigate to the demo page.
   await page.goto(url);
@@ -80,7 +92,8 @@ const url2pdf = async (url) => {
   if (pdf) {
     console.log('Wrote pdf to buffer');
   }
-  // Close the browser.
+  // Close the page.
+  await page.close();
   await browser.close();
 
   const pdfFilename = buildFileName(url);
@@ -115,7 +128,6 @@ const isValidURL = (url) => {
 
 // ************** Server
 const app = module.exports = new Koa();
-const router = new Router();
 
 // Middlewares
 app.use(cors());
@@ -132,6 +144,7 @@ app.use(serve(__dirname + '/ui/', {
   gzip: true
 }));
 
+// Sending mail
 var senderEmailAddress = process.env.EMAIL_ADDRESS;
 var senderEmailPassword = process.env.EMAIL_PASSWORD;
 var sedingMailEnabled = senderEmailAddress && senderEmailPassword;
@@ -146,8 +159,32 @@ var mailTransporter = nodemailer.createTransport({
   }
 });
 
+// Rate limiting
+const db = new Map();
+app.use(ratelimit({
+  driver: 'memory',
+  db: db,
+  duration: 60000,
+  errorMessage: 'Server is busy. Try again later.',
+  id: (ctx) => ctx.ip,
+  headers: {
+    remaining: 'Rate-Limit-Remaining',
+    reset: 'Rate-Limit-Reset',
+    total: 'Rate-Limit-Total'
+  },
+  max: 10,
+  disableHeader: false,
+  whitelist: (ctx) => {
+    // some logic that returns a boolean
+  },
+  blacklist: (ctx) => {
+    // some logic that returns a boolean
+  }
+}));
+
 // API
-router.get('/api/v1/pdf', async function (ctx) {
+const router = new Router();
+router.get('/api/v1/pdf', async (ctx) => {
   const url = ctx.query.url;
   if (!isValidURL(url)) {
     console.log(`Bad url ${url}`);
