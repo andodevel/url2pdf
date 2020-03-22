@@ -2,7 +2,7 @@
 
 HTML to PDF converter that use [Chrome](https://www.google.com/chrome/) headless 'print as PDF' and
 [wkhtml](https://wkhtmltopdf.org/) under the hood. Also support for sending pdf to specific email :).   
-Please give [url2pdf.dev](url2pdf.dev) a try if you want to see how this project is in prodution. Feel free if you
+Please give [url2pdf.dev](https://url2pdf.dev) a try if you want to see how this project is in prodution. Feel free if you
 want to deploy this to your own server.  
 
 ## Development
@@ -48,7 +48,7 @@ to use already built image.
 The latest built image was pushed to Google Cloud Register _gcr.io/url2pdf/url2pdf:latest_  
 
 ### Deployment
-[url2pdf.dev](url2pdf.dev) was deployed to GCP k8s. You can find configuration of this deployment under [k8s](k8s)
+[url2pdf.dev](https://url2pdf.dev) was deployed to GCP k8s. You can find configuration of this deployment under [k8s](k8s)
 sub directory.  
 
 ## License
