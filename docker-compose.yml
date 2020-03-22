@@ -6,14 +6,12 @@ services:
     build: .
     ports:
       - "${PORT}:${PORT}"
-      - "8080:8080"
     expose:
       - "${PORT}"
-      - "8080"
     networks: 
       - url2pdf
     environment:
-      - PORT=${PORT}
+      - PORT=${PORT:-8080}
       - EMAIL_ADDRESS=${EMAIL_ADDRESS}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
 
