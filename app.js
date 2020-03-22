@@ -134,6 +134,10 @@ const isValidURL = (url) => {
 
 // ************** Server
 const app = module.exports = new Koa();
+app.use(async (ctx, next) => {
+  ctx.req.setTimeout(0); // Disable timeout
+  await next();
+});
 
 // Middlewares
 app.use(cors());
