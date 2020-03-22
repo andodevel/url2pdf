@@ -258,5 +258,8 @@ app.use(router.routes()).use(router.allowedMethods());
 // UI
 
 var port = process.env.PORT || 8080;
-if (!module.parent) app.listen(port);
-console.log(`Start an instance of url2pdf server at :${port}`);
+if (!module.parent) {
+  const server = app.listen(port);
+  server.setTimeout(0);
+  console.log(`Start an instance of url2pdf server at :${port}`);
+}
