@@ -185,7 +185,18 @@
         .catch((e) => {
           const msg = e.message;
           showLoadingState(false);
-          $("#alertErrorTxt").text(msg === '400' ? 'Invalid url or email!' : 'Something wrong with the server. Try again later!');
+          switch(msg) {
+            case '400':
+              $("#alertErrorTxt").text('Invalid url or email!');
+              break;
+            case '429':
+              $("#alertErrorTxt").text('Server is busy. Try again later!');
+              break;
+            default:
+              $("#alertErrorTxt").text('Something wrong with the server. Try again later!');
+              break;
+          }
+          
           $("#alertError").show();
         });
     };

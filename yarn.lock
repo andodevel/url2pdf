@@ -454,6 +454,16 @@ koa-is-json@^1.0.0:
   resolved "https://registry.yarnpkg.com/koa-is-json/-/koa-is-json-1.0.0.tgz#273c07edcdcb8df6a2c1ab7d59ee76491451ec14"
   integrity sha1-JzwH7c3Ljfaiwat9We52SRRR7BQ=
 
+koa-ratelimit@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/koa-ratelimit/-/koa-ratelimit-4.2.1.tgz#2dfed49d0aa5d83664adb162e82eaeb8fea92132"
+  integrity sha512-LKheeRD+nNZQd8ePDWHAhwcdl+rHvnAgilMjFMApLpyn3qnU2JER+K22BCR+b+u4Mb6JwNcwjGWjmEyEoApDSg==
+  dependencies:
+    debug "^4.1.1"
+    lodash.defaults "^4.2.0"
+    ms "^2.1.1"
+    ratelimiter "^3.2.0"
+
 koa-router@^8.0.8:
   version "8.0.8"
   resolved "https://registry.yarnpkg.com/koa-router/-/koa-router-8.0.8.tgz#f0b70f90dae275db8c71a41e1efb625581fb3b5a"
@@ -518,6 +528,11 @@ listenercount@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/listenercount/-/listenercount-1.0.1.tgz#84c8a72ab59c4725321480c975e6508342e70937"
   integrity sha1-hMinKrWcRyUyFIDJdeZQg0LnCTc=
+
+lodash.defaults@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.defaults/-/lodash.defaults-4.2.0.tgz#d09178716ffea4dde9e5fb7b37f6f0802274580c"
+  integrity sha1-0JF4cW/+pN3p5ft7N/bwgCJ0WAw=
 
 media-typer@0.3.0:
   version "0.3.0"
@@ -692,6 +707,11 @@ qs@^6.5.1:
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.1.tgz#20082c65cb78223635ab1a9eaca8875a29bf8ec9"
   integrity sha512-Cxm7/SS/y/Z3MHWSxXb8lIFqgqBowP5JMlTUFyJN88y0SGQhVmZnqFK/PeuMX9LzUyWsqqhNxIyg0jlzq946yA==
+
+ratelimiter@^3.2.0:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/ratelimiter/-/ratelimiter-3.4.1.tgz#fa69e94937413382a926aaa17aaeaa6263af4659"
+  integrity sha512-5FJbRW/Jkkdk29ksedAfWFkQkhbUrMx3QJGwMKAypeIiQf4yrLW+gtPKZiaWt4zPrtw1uGufOjGO7UGM6VllsQ==
 
 readable-stream@^2.0.2, readable-stream@^2.2.2, readable-stream@^2.3.5, readable-stream@~2.3.6:
   version "2.3.7"

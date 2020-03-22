@@ -13,6 +13,7 @@
 // API and docs
 // Watermark
 // Auto expand http(s)
+// Check chrome and close to release resource
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
@@ -27,7 +28,7 @@ const nodemailer = require('nodemailer');
 
 const isDarwin = 'darwin' === process.platform
 const chromePort = 21222;
-const pageTimeout = 0; // 30s
+const pageTimeout = 3 * 60 * 1000; // 3 minutes
 
 const scrollToEnd = async (page) => {
   await page.evaluate(async () => {
@@ -54,9 +55,9 @@ const url2pdf = async (url) => {
   const browserURL = `http://127.0.0.1:${chromePort}`;
   let browser;
   try {
-    browser = await puppeteer.connect({browserURL});
+    browser = await puppeteer.connect({ browserURL });
     console.log('Connecting to existing instance of Chrome.');
-  } catch {}
+  } catch { }
   if (!browser) {
     console.log('Launch new instance of Chrome.');
     browser = await puppeteer.launch({
@@ -67,6 +68,7 @@ const url2pdf = async (url) => {
   }
 
   const page = await browser.newPage();
+  try {
   page.setViewport({ width: 1280, height: 926 });
   await page.setDefaultNavigationTimeout(pageTimeout);
 
@@ -92,10 +94,13 @@ const url2pdf = async (url) => {
   if (pdf) {
     console.log('Wrote pdf to buffer');
   }
-  // Close the page.
-  await page.close();
-  await browser.close();
-
+  } finally {
+    if (page){
+    // Close the page.
+    await page.close();
+    }
+  }
+  
   const pdfFilename = buildFileName(url);
   return { pdf, pdfFilename };
 };
@@ -172,13 +177,13 @@ app.use(ratelimit({
     reset: 'Rate-Limit-Reset',
     total: 'Rate-Limit-Total'
   },
-  max: 10,
+  max: 20,
   disableHeader: false,
   whitelist: (ctx) => {
-    // some logic that returns a boolean
+    // return true;
   },
   blacklist: (ctx) => {
-    // some logic that returns a boolean
+    // return false;
   }
 }));
 
