@@ -3,14 +3,10 @@
 // TODO:
 // 404 handler
 // Minified ui code
-// Rate limiter
-// Return error
 // Move submit to loaded
 // Medium support
 // API and docs
 // Watermark
-// Check chrome and close to release resource
-// Font issue vnexppress.net
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
@@ -22,9 +18,10 @@ const sanitize = require('sanitize-filename');
 const serve = require('koa-static');
 const ratelimit = require('koa-ratelimit');
 const nodemailer = require('nodemailer');
+const cron = require("node-cron");
 
 const isDarwin = 'darwin' === process.platform
-const chromePort = 21222;
+const browserURL = `http://127.0.0.1:21222`;
 const pageTimeout = 3 * 60 * 1000; // 3 minutes
 
 const scrollToEnd = async (page) => {
@@ -46,10 +43,8 @@ const scrollToEnd = async (page) => {
   });
 };
 
-// TODO: Fallback to wkhtml2pdf if chrome fail to launch or convert
 const url2pdf = async (url) => {
   // Set up browser and page.
-  const browserURL = `http://127.0.0.1:${chromePort}`;
   let browser;
   try {
     browser = await puppeteer.connect({ browserURL });
@@ -69,8 +64,6 @@ const url2pdf = async (url) => {
   try {
     page.setViewport({ width: 1280, height: 926 });
     await page.setDefaultNavigationTimeout(pageTimeout);
-
-    // Navigate to the demo page.
     await page.goto(url);
 
     // Some page need scrolling to lazy load image.
@@ -269,11 +262,22 @@ router.get('/api/v1/pdf', async (ctx) => {
 
 app.use(router.routes()).use(router.allowedMethods());
 
-// UI
-
 var port = process.env.PORT || 8080;
 if (!module.parent) {
   const server = app.listen(port);
   server.setTimeout(0);
   console.log(`Start an instance of url2pdf server at :${port}`);
 }
+
+// Cron job to cleanup at 11:59PM every day.
+cron.schedule("* * * * *", async function() {
+  console.log("Execute cron job to cleanup resource.");
+  try {
+    let browser = await puppeteer.connect({ browserURL });
+    console.log('Connecting to existing instance of Chrome.');
+    if (browser) {
+      browser.close();
+      console.log('Closed running chrome.');
+    }
+  } catch { }
+});

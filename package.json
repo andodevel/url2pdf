@@ -11,6 +11,7 @@
     "koa-ratelimit": "^4.2.1",
     "koa-router": "^8.0.8",
     "koa-static": "^5.0.0",
+    "node-cron": "^2.0.3",
     "nodemailer": "^6.4.5",
     "puppeteer-core": "^2.1.1",
     "sanitize-filename": "^1.6.3",
