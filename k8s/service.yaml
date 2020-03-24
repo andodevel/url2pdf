@@ -6,6 +6,8 @@ metadata:
   namespace: "default"
   labels:
     app: "url2pdf"
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"url2pdf-backendconfig"}}'
 spec:
   ports:
   - protocol: "TCP"

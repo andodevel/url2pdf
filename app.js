@@ -14,6 +14,7 @@
 // Watermark
 // Auto expand http(s)
 // Check chrome and close to release resource
+// Font issue vnexppress.net
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
