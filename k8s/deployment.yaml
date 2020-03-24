@@ -26,6 +26,11 @@ spec:
     spec:
       containers:
       - env:
+        - name: EMAIL_SERVICE
+          valueFrom:
+            secretKeyRef:
+              key: EMAIL_SERVICE
+              name: email.service
         - name: EMAIL_ADDRESS
           valueFrom:
             secretKeyRef:

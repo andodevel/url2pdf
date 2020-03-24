@@ -21,6 +21,7 @@ First, create an .env file
 PROJECT_ID={{gcp_project_id}}
 PORT={{port_to_start_server_on}}
 CHROME_BIN={{chrome_executable_path}}
+EMAIL_SERVICE={{email_service_provider}}
 EMAIL_ADDRESS={{sender_email_address}}
 EMAIL_PASSWORD={{sender_email_password}}
 ```

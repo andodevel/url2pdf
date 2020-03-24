@@ -5,14 +5,10 @@
 // Minified ui code
 // Rate limiter
 // Return error
-// ignore email validate
-// Reset validator after finish
 // Move submit to loaded
-// Add caching
-// URL 404
+// Medium support
 // API and docs
 // Watermark
-// Auto expand http(s)
 // Check chrome and close to release resource
 // Font issue vnexppress.net
 
@@ -165,14 +161,15 @@ app.use(serve(__dirname + '/ui/', {
 }));
 
 // Sending mail
+var senderEmailService = process.env.EMAIL_SERVICE;
 var senderEmailAddress = process.env.EMAIL_ADDRESS;
 var senderEmailPassword = process.env.EMAIL_PASSWORD;
-var sedingMailEnabled = senderEmailAddress && senderEmailPassword;
+var sedingMailEnabled = senderEmailService && senderEmailAddress && senderEmailPassword;
 if (!sedingMailEnabled) {
-  console.log('Sending email feature is disabled due to missing env EMAIL_ADDRESS and EMAIL_PASSWORD');
+  console.log('Sending email feature is disabled due to missing env EMAIL_SERVICE, EMAIL_ADDRESS, or EMAIL_PASSWORD');
 }
 var mailTransporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: senderEmailService,
   auth: {
     user: senderEmailAddress,
     pass: senderEmailPassword
@@ -205,7 +202,14 @@ app.use(ratelimit({
 // API
 const router = new Router();
 router.get('/api/v1/pdf', async (ctx) => {
-  const url = ctx.query.url;
+  let url = ctx.query.url;
+  // Auto prepending http protocol.
+  if (url) {
+    url = url.trim();
+    if (!url.startsWith('http')) {
+      url = 'http://' + url;
+    }
+  }
   if (!isValidURL(url)) {
     console.log(`Bad url ${url}`);
     ctx.throw(400, 'Invalid url');

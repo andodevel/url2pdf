@@ -12,6 +12,7 @@ services:
       - url2pdf
     environment:
       - PORT=${PORT:-8080}
+      - EMAIL_SERVICE=${EMAIL_SERVICE}
       - EMAIL_ADDRESS=${EMAIL_ADDRESS}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
 
