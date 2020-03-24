@@ -150,7 +150,16 @@ app.use(compress({
   },
   threshold: 2048,
   flush: require('zlib').Z_SYNC_FLUSH
-}))
+}));
+// Simple caching strategy
+app.use(async (ctx, next) => {
+  if (ctx.url && ctx.url.toLowerCase().endsWith('bg.jpg')) {
+    ctx.set('Pragma', 'public');
+    ctx.set('Cache-Control', 'max-age: 604800');
+    ctx.set("Expires", new Date(Date.now() + 604800).toUTCString());
+  }
+  await next();
+});
 app.use(serve(__dirname + '/ui/', {
   gzip: true
 }));
