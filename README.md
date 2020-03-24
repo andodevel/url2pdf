@@ -5,6 +5,10 @@ Generate PDF file from input web link that uses [Chrome](https://www.google.com/
 Please give [url2pdf.dev](https://url2pdf.dev) a try if you want to see how this project is in prodution. Feel free if you
 want to deploy this to your own server.  
 
+# Chrome extensions
+
+[uBlock0_1.25.3b9.chromium](https://github.com/gorhill/uBlock)  
+
 ## Development
 
 ### Setup

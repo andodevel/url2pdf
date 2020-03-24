@@ -8,6 +8,9 @@
 // API and docs
 // Watermark
 // SEO
+// Protect the API
+// Split up and refactor code
+// Remove ads
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');
@@ -24,6 +27,7 @@ const cron = require("node-cron");
 const isDarwin = 'darwin' === process.platform
 const browserURL = `http://127.0.0.1:21222`;
 const pageTimeout = 3 * 60 * 1000; // 3 minutes
+const chromeExt = 'extensions/uBlock';
 
 const scrollToEnd = async (page) => {
   await page.evaluate(async () => {
@@ -44,20 +48,37 @@ const scrollToEnd = async (page) => {
   });
 };
 
+const connectToRunningChrome = async () => {
+  const browser = await puppeteer.connect({ browserURL });
+  console.log('Connecting to the running instance of Chrome.');
+  return browser;
+}
+
+const launchChrome = async () => {
+  console.log('Launch a new instance of Chrome.');
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--disable-gpu',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--remote-debugging-port=21222',
+      `--disable-extensions-except=${chromeExt}`,
+      `--load-extension=${chromeExt}`],
+    executablePath: isDarwin ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : process.env.CHROME_BIN,
+  });
+
+  return browser;
+}
+
 const url2pdf = async (url) => {
   // Set up browser and page.
   let browser;
   try {
-    browser = await puppeteer.connect({ browserURL });
-    console.log('Connecting to existing instance of Chrome.');
+    browser = await connectToRunningChrome();
   } catch { }
   if (!browser) {
-    console.log('Launch new instance of Chrome.');
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--remote-debugging-port=21222'],
-      executablePath: isDarwin ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : process.env.CHROME_BIN,
-    });
+    browser = await launchChrome();
   }
 
   let pdf;
@@ -265,20 +286,32 @@ app.use(router.routes()).use(router.allowedMethods());
 
 var port = process.env.PORT || 8080;
 if (!module.parent) {
+  try {
   const server = app.listen(port);
+  if (!server) {
+    console.log('Fail to start sever!');
+    process.exit(1);
+  }
   server.setTimeout(0);
   console.log(`Start an instance of url2pdf server at :${port}`);
+  } catch {
+    console.log('Fail to start sever!');
+    process.exit(1);
+  }
 }
 
 // Cron job to cleanup at 11:59PM every day.
-cron.schedule("59 23 * * *", async function() {
+cron.schedule("59 23 * * *", async function () {
   console.log("Execute cron job to cleanup resource.");
   try {
-    let browser = await puppeteer.connect({ browserURL });
-    console.log('Connecting to existing instance of Chrome.');
+    let browser = await connectToRunningChrome();
     if (browser) {
       browser.close();
       console.log('Closed running chrome.');
+      launchChrome();
     }
   } catch { }
 });
+
+// Make chrome ready to be used. 
+launchChrome();
