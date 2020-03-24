@@ -270,7 +270,7 @@ if (!module.parent) {
 }
 
 // Cron job to cleanup at 11:59PM every day.
-cron.schedule("* * * * *", async function() {
+cron.schedule("59 23 * * *", async function() {
   console.log("Execute cron job to cleanup resource.");
   try {
     let browser = await puppeteer.connect({ browserURL });

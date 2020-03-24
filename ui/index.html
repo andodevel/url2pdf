@@ -74,7 +74,7 @@
                 </div>
                 <button type="submit" id="submit" class="btn btn-warning btn-lg">
                   <span id="spinner" class="spinner-border spinner-border-sm mr-1" role="status" hidden></span>
-                  <span id="submitText">Convert</span>
+                  <span id="submitText">Generate</span>
                 </button>
               </form>
             </div>
@@ -85,7 +85,7 @@
               </button>
             </div>
             <div id="alertSuccess" class="mt-4 alert alert-success fade show" role="alert" style="display: none;">
-              <span id="alertSuccessTxt">Converting has been done.</span>
+              <span id="alertSuccessTxt">PDF file has been generated.</span>
               <button id="alertSuccessBtn" type="button" class="close" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -108,7 +108,11 @@
   </section>
 
   <script>
+    // Global vars
+    var isGenerating = false;
+
     function showLoadingState(isLoading) {
+      isGenerating = isLoading;
       actionEls.forEach(actionEl => {
         actionEl.disabled = isLoading;
       });
@@ -117,13 +121,13 @@
       });
 
       if (!isLoading) {
-        submitTextEle.textContent = 'Convert';
+        submitTextEle.textContent = 'Generate';
         inputEles.forEach(inputEle => {
           inputEle.value = "";
         })
         $('#form').removeClass('was-validated');
       } else {
-        submitTextEle.textContent = 'Converting';
+        submitTextEle.textContent = 'Generating...';
       }
     };
 
@@ -247,6 +251,15 @@
           $('#cover').css('background-image', `url(${url})`);
         });
       }, false);
+
+      window.addEventListener("beforeunload", function (e) {
+        if (isGenerating) {
+          const warnmsg = "Your PDF is generating. You might lost it if you leave this page!";
+          (e || window.event).returnValue = warnmsg;
+          return warnmsg;
+        }
+        return undefined;
+      });
     })();
 
     var formEl = document.getElementById('form');
