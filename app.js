@@ -7,6 +7,7 @@
 // Medium support
 // API and docs
 // Watermark
+// SEO
 
 const puppeteer = require('puppeteer-core');
 const Koa = require('koa');

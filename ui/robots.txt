@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Allow: /ads.txt
+Disallow: /.well-known/amphtml/apikey.pub
+Sitemap: https://url2pdf.dev/sitemap.xml
